@@ -1,35 +1,95 @@
+# RecallMind iOS
+
+**Listen. Learn. Remember.**
+
+RecallMind is an iPhone-first learning and memory application that turns
+recorded or uploaded audio into structured, searchable knowledge.
+
+The core product flow is:
+
+Record / Upload
+→ Transcribe
+→ Understand
+→ Ask AI
+→ Study
+→ Recall
 
 ---
 
-# Protect `main`
+## Platform
 
-For a new GitHub repo, I recommend using a **GitHub Ruleset** targeting the default branch. Rulesets can require PRs, status checks, signed commits, linear history, and block force pushes/deletion. :chatgpt-content-reference{index="0"}
+RecallMind v1 focuses exclusively on:
 
-Configure:
+- iPhone
+- iOS
+- Native SwiftUI
 
-| Setting | RecallMind recommendation |
-|---|---|
-| Ruleset name | `Protect main` |
-| Enforcement | **Active** |
-| Target | Default branch / `main` |
-| Restrict deletions | **ON** |
-| Block force pushes | **ON** |
-| Require pull request before merging | **ON** |
-| Required approvals | **0 while you're solo**, then **1** when another developer joins |
-| Dismiss stale approvals | ON once you have reviewers |
-| Require conversation resolution | **ON** |
-| Require status checks | **ON after CI is working** |
-| Require branch up to date | Recommended |
-| Require linear history | **ON** |
-| Merge method | **Squash merge** |
-| Bypass list | Ideally empty |
-| Allow direct pushes to `main` | **No** |
+Web and iPad versions are deferred until after the initial iPhone release.
 
-GitHub supports required PRs and required status checks directly through rulesets/protected branches. :chatgpt-content-reference{index="1"}
+---
 
-### Important for you as a solo developer
+## Technology
 
-Do **not** set:
+- Swift
+- SwiftUI
+- Swift Concurrency / async-await
+- Supabase Auth
+- Supabase PostgreSQL
+- Supabase Storage
+- Supabase Row Level Security
+- Sign in with Apple
+- AVFoundation
+- SwiftData where appropriate
+- Keychain
+- StoreKit 2
+- UserNotifications / APNs
+- URLSession
+- Swift Package Manager
+
+---
+
+## Authentication
+
+RecallMind v1 supports:
+
+- Sign in with Apple
+- Email + Password
+
+Authentication is provided by Supabase Auth.
+
+User-facing features should never reference Supabase directly.
+
+---
+
+## Architecture
+
+RecallMind uses a feature-first SwiftUI architecture with MVVM.
 
 ```text
-Required approvals = 1
+RecallMind/
+│
+├── App/
+│
+├── Features/
+│   ├── Authentication/
+│   ├── Onboarding/
+│   ├── Home/
+│   ├── Recording/
+│   ├── Upload/
+│   ├── Processing/
+│   ├── Notes/
+│   ├── Transcript/
+│   ├── AskAI/
+│   ├── Study/
+│   ├── Search/
+│   ├── Notifications/
+│   ├── Account/
+│   ├── Settings/
+│   └── Premium/
+│
+├── Domain/
+├── Data/
+├── Core/
+├── DesignSystem/
+├── Resources/
+└── Extensions/
