@@ -12,6 +12,7 @@ struct MainTabView: View {
             PlaceholderTab(title: "Settings")
                 .tabItem { Label("Settings", systemImage: "gearshape") }
         }
+        .tint(RMColors.gold)
     }
 }
 
