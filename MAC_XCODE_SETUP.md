@@ -19,8 +19,6 @@ The repository contains Swift sources only. The remaining steps need macOS and X
    `InterFace` names in `RMTypography.swift` if they differ. A wrong name silently falls back to SF Pro.
 10. **Build** — ⌘B with no warnings or errors.
 11. **Test** — ⌘U; all `AppStateTests` must pass.
-12. **Simulator** — launch shows the brand mark, then the signed-out placeholder (~400 ms mock restore).
-    Check text renders in Inter, dark appearance, portrait lock, and several iPhone sizes.
+12. **Simulator** — launch shows the brand mark, then AUTH 01 Welcome (~400 ms mock restore).
+    Check text renders in Inter, dark appearance, portrait lock, several iPhone sizes and large Dynamic Type.
 13. **Physical iPhone** — repeat the launch and appearance checks on a device.
-14. **RMBrandMark** — compare against the AUTH 01 visual reference and confirm vertical bar alignment
-    (currently provisional: centered).

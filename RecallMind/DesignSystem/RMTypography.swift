@@ -18,7 +18,7 @@ enum RMTypography {
 }
 
 /// Inter PostScript names. Verify against the bundled font files.
-private enum InterFace {
+enum InterFace {
     static let regular = "Inter-Regular"
     static let medium = "Inter-Medium"
     static let semibold = "Inter-SemiBold"

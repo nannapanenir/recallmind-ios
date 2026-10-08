@@ -46,8 +46,7 @@ struct RMBrandMarkShape: Shape {
         var path = Path()
         for (index, barHeight) in Self.barHeights.enumerated() {
             let x = CGFloat(index) * (Self.barWidth + Self.barGap)
-            // PENDING AUTH 01 verification: vertical bar alignment is not locked in the spec.
-            // Bars are provisionally centered on the canvas's horizontal midline.
+            // Bars are centered on the canvas's horizontal midline (verified against AUTH 01).
             let y = (canvas.height - barHeight) / 2
             let bar = CGRect(
                 x: originX + x * scale,

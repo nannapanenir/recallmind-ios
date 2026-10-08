@@ -1,18 +1,22 @@
 import SwiftUI
 
-/// Placeholder root for the signed-out flow. AUTH 01–08 are not implemented yet.
+/// Root of the signed-out flow. Owns the routing decisions for the auth screens.
 struct AuthenticationFlowView: View {
     var body: some View {
-        ZStack {
-            RMColors.background.ignoresSafeArea()
-            VStack(spacing: RMSpacing.md) {
-                RMBrandMark()
-                Text("RecallMind")
-                    .font(RMTypography.titleLarge)
-                    .foregroundStyle(RMColors.textPrimary)
+        WelcomeView(
+            onContinueWithApple: {
+                // Pending: Sign in with Apple authorization is not implemented yet.
+            },
+            onContinueWithEmail: {
+                // Pending AUTH 02 — Email Sign In.
+            },
+            onShowTerms: {
+                // Pending: Terms of Service destination not defined yet.
+            },
+            onShowPrivacy: {
+                // Pending: Privacy Policy destination not defined yet.
             }
-            .padding(.horizontal, RMSpacing.pageInset)
-        }
+        )
     }
 }
 
