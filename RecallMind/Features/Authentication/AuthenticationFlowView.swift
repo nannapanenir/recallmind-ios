@@ -4,6 +4,7 @@ import SwiftUI
 struct AuthenticationFlowView: View {
     private enum Route: Hashable {
         case emailSignIn
+        case createAccount
     }
 
     @Environment(AppState.self) private var appState
@@ -31,6 +32,8 @@ struct AuthenticationFlowView: View {
                 switch route {
                 case .emailSignIn:
                     emailSignIn
+                case .createAccount:
+                    createAccount
                 }
             }
         }
@@ -51,9 +54,34 @@ struct AuthenticationFlowView: View {
                 // Pending AUTH 05 — Forgot Password.
             },
             onCreateAccount: {
-                // Pending AUTH 03 — Create Account.
+                path.append(.createAccount)
             }
         )
+    }
+
+    private var createAccount: some View {
+        CreateAccountView(
+            viewModel: CreateAccountViewModel(repository: environment.authRepository),
+            onVerificationRequired: { _ in
+                // Pending AUTH 04 — Verify Email.
+            },
+            onSignIn: popToSignIn,
+            onShowTerms: {
+                // Pending: Terms of Service destination not defined yet.
+            },
+            onShowPrivacy: {
+                // Pending: Privacy Policy destination not defined yet.
+            }
+        )
+    }
+
+    /// Returns to AUTH 02, keeping the screens below it.
+    private func popToSignIn() {
+        if let index = path.lastIndex(of: .emailSignIn) {
+            path.removeSubrange(path.index(after: index)...)
+        } else {
+            path = [.emailSignIn]
+        }
     }
 }
 

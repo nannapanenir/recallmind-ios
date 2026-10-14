@@ -88,6 +88,31 @@ struct RMFieldError: View {
     }
 }
 
+/// DS 07 field hint below a field, e.g. a password rule. The check turns success green once the rule is met.
+struct RMFieldHint: View {
+    private let message: String
+    private let isMet: Bool
+
+    @ScaledMetric(relativeTo: .callout) private var iconSize: CGFloat = 16
+
+    init(_ message: String, isMet: Bool) {
+        self.message = message
+        self.isMet = isMet
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: RMSpacing.xs) {
+            Image(systemName: "checkmark")
+                .font(.system(size: iconSize, weight: .semibold))
+                .foregroundStyle(isMet ? RMColors.success : RMColors.textSecondary)
+                .accessibilityHidden(true)
+            Text(message)
+                .font(RMTypography.callout)
+                .foregroundStyle(RMColors.textSecondary)
+        }
+    }
+}
+
 extension View {
     /// DS 07 field container: surface fill, hairline border; gold when focused, danger when invalid.
     func rmFieldChrome(isFocused: Bool, isInvalid: Bool, trailingPadding: CGFloat = RMSpacing.md) -> some View {

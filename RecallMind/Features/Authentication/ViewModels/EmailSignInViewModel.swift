@@ -22,32 +22,7 @@ final class EmailSignInViewModel {
     }
 
     /// AUTH 08 messages shown inline above the Sign In button.
-    enum Banner: Equatable {
-        case incorrectCredentials
-        case unableToConnect
-        case tooManyAttempts
-        /// An error that is not one of the classified `AuthError` cases.
-        /// PENDING AUTH 08 / design: no approved copy yet, so nothing is shown.
-        case unexpectedError
-
-        /// `nil` when the state has no approved copy.
-        var title: String? {
-            switch self {
-            case .incorrectCredentials: "Incorrect email or password."
-            case .unableToConnect: "Unable to connect"
-            case .tooManyAttempts: "Too many attempts. Try again later."
-            case .unexpectedError: nil
-            }
-        }
-
-        var message: String? {
-            switch self {
-            case .incorrectCredentials: "Check your details and try again."
-            case .unableToConnect: "Check your internet connection."
-            case .tooManyAttempts, .unexpectedError: nil
-            }
-        }
-    }
+    typealias Banner = AuthBanner
 
     var email = "" {
         // TextField re-assigns the unchanged text when it loses focus; only a real edit clears the error.
@@ -116,6 +91,6 @@ final class EmailSignInViewModel {
     }
 
     static func isValidEmail(_ email: String) -> Bool {
-        email.wholeMatch(of: #/[^\s@]+@[^\s@]+\.[^\s@]+/#) != nil
+        AuthValidation.isValidEmail(email)
     }
 }

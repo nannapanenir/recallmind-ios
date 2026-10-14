@@ -6,27 +6,6 @@ import Testing
 struct EmailSignInViewModelTests {
     private struct UnexpectedFailure: Error {}
 
-    /// Records sign-in calls; returns `result` after an optional delay.
-    @MainActor
-    private final class SpyAuthRepository: AuthRepository {
-        private(set) var signInEmails: [String] = []
-        var result: Result<User, any Error>
-        private let delay: Duration
-
-        init(result: Result<User, any Error>, delay: Duration = .zero) {
-            self.result = result
-            self.delay = delay
-        }
-
-        func restoreSession() async throws -> User? { nil }
-
-        func signIn(email: String, password: String) async throws -> User {
-            signInEmails.append(email)
-            try await Task.sleep(for: delay)
-            return try result.get()
-        }
-    }
-
     private let user = User(id: UUID(), email: "ram@example.com")
 
     private func makeViewModel(signInError: (any Error)? = nil) -> EmailSignInViewModel {
