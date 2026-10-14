@@ -16,4 +16,8 @@ protocol AuthRepository: Sendable {
 
     /// Returns the signed-in user once `email` is verified, or `nil` while it is not yet.
     func checkEmailVerification(email: String) async throws -> User?
+
+    /// Sends a password reset link to `email`.
+    /// Also succeeds when no account uses the email: the result never reveals whether one exists.
+    func requestPasswordReset(email: String) async throws
 }

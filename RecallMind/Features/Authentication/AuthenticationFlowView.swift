@@ -6,6 +6,7 @@ struct AuthenticationFlowView: View {
         case emailSignIn
         case createAccount
         case verifyEmail(email: String, context: VerifyEmailViewModel.Context)
+        case forgotPassword
     }
 
     @Environment(AppState.self) private var appState
@@ -37,6 +38,8 @@ struct AuthenticationFlowView: View {
                     createAccount
                 case .verifyEmail(let email, let context):
                     verifyEmail(email: email, context: context)
+                case .forgotPassword:
+                    forgotPassword
                 }
             }
         }
@@ -54,7 +57,7 @@ struct AuthenticationFlowView: View {
                 path.append(.verifyEmail(email: email, context: .signInUnverified))
             },
             onForgotPassword: {
-                // Pending AUTH 05 — Forgot Password.
+                path.append(.forgotPassword)
             },
             onCreateAccount: {
                 path.append(.createAccount)
@@ -87,6 +90,16 @@ struct AuthenticationFlowView: View {
             },
             onUseDifferentEmail: showCreateAccount,
             onSignIn: popToSignIn
+        )
+    }
+
+    private var forgotPassword: some View {
+        ForgotPasswordView(
+            viewModel: ForgotPasswordViewModel(repository: environment.authRepository),
+            onResetLinkSent: { _ in
+                // Pending AUTH 06 — Check Your Email.
+            },
+            onBackToSignIn: popToSignIn
         )
     }
 

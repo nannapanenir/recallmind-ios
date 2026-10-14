@@ -9,12 +9,14 @@ final class SpyAuthRepository: AuthRepository {
     var signUpResult: Result<Void, any Error> = .success(())
     var resendResult: Result<Void, any Error> = .success(())
     var verificationResult: Result<User?, any Error> = .success(nil)
+    var passwordResetResult: Result<Void, any Error> = .success(())
 
     private(set) var signInEmails: [String] = []
     private(set) var signUpEmails: [String] = []
     private(set) var signUpPasswords: [String] = []
     private(set) var resendEmails: [String] = []
     private(set) var verificationChecks: [String] = []
+    private(set) var passwordResetEmails: [String] = []
 
     private let delay: Duration
 
@@ -48,5 +50,11 @@ final class SpyAuthRepository: AuthRepository {
         verificationChecks.append(email)
         try await Task.sleep(for: delay)
         return try verificationResult.get()
+    }
+
+    func requestPasswordReset(email: String) async throws {
+        passwordResetEmails.append(email)
+        try await Task.sleep(for: delay)
+        try passwordResetResult.get()
     }
 }

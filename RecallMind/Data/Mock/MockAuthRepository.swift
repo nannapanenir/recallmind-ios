@@ -9,6 +9,7 @@ struct MockAuthRepository: AuthRepository {
     private let resendError: (any Error)?
     private let isEmailVerified: Bool
     private let verificationError: (any Error)?
+    private let passwordResetError: (any Error)?
     private let latency: Duration
 
     /// Defaults to no active session and successful operations, each after ~400 ms.
@@ -22,6 +23,7 @@ struct MockAuthRepository: AuthRepository {
         resendError: (any Error)? = nil,
         isEmailVerified: Bool = true,
         verificationError: (any Error)? = nil,
+        passwordResetError: (any Error)? = nil,
         latency: Duration = .milliseconds(400)
     ) {
         self.user = user
@@ -32,6 +34,7 @@ struct MockAuthRepository: AuthRepository {
         self.resendError = resendError
         self.isEmailVerified = isEmailVerified
         self.verificationError = verificationError
+        self.passwordResetError = passwordResetError
         self.latency = latency
     }
 
@@ -74,5 +77,13 @@ struct MockAuthRepository: AuthRepository {
             throw verificationError
         }
         return isEmailVerified ? (signInUser ?? User(id: UUID(), email: email)) : nil
+    }
+
+    /// Succeeds for any email unless `passwordResetError` is set; no email is sent.
+    func requestPasswordReset(email: String) async throws {
+        try await Task.sleep(for: latency)
+        if let passwordResetError {
+            throw passwordResetError
+        }
     }
 }
