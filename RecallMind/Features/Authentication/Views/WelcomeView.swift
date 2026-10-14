@@ -30,7 +30,7 @@ struct WelcomeView: View {
                     .frame(height: Layout.buttonHeight)
 
                 Button(action: onContinueWithEmail) {
-                    HStack(spacing: Layout.emailIconGap) {
+                    HStack(spacing: RMSpacing.xs) {
                         Image(systemName: "envelope")
                             .font(.system(size: emailIconSize))
                             .accessibilityHidden(true)
@@ -61,10 +61,10 @@ struct WelcomeView: View {
     }
 
     private var brandLockup: some View {
-        VStack(spacing: Layout.markToWordmark) {
+        VStack(spacing: RMSpacing.xl) {
             RMBrandMark()
 
-            VStack(spacing: Layout.wordmarkToTagline) {
+            VStack(spacing: RMSpacing.xs) {
                 (Text("Recall").foregroundStyle(RMColors.textPrimary)
                     + Text("Mind").foregroundStyle(RMColors.gold))
                     .font(WelcomeTypography.wordmark)
@@ -103,12 +103,9 @@ struct WelcomeView: View {
     }
 }
 
-/// AUTH 01 layout values that have no Design System token.
+/// AUTH 01 layout value with no spacing token (DS 06 Buttons: 54 pt).
 private enum Layout {
     static let buttonHeight: CGFloat = 54
-    static let markToWordmark: CGFloat = 22
-    static let wordmarkToTagline: CGFloat = 10
-    static let emailIconGap: CGFloat = 10
 }
 
 /// Welcome-only brand lockup type (DS 01 Brand): wordmark 34 Bold, tagline 16 Medium.
@@ -116,7 +113,6 @@ private enum WelcomeTypography {
     static let wordmark = Font.custom(InterFace.bold, size: 34, relativeTo: .largeTitle)
     static let wordmarkTracking: CGFloat = -0.34
     static let tagline = Font.custom(InterFace.medium, size: 16, relativeTo: .callout)
-    static let legalLink = Font.custom(InterFace.medium, size: 12, relativeTo: .caption)
 }
 
 /// Gold underlined text link with a 44 pt hit area that does not change line layout.
@@ -129,7 +125,7 @@ private struct LegalLinkButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(WelcomeTypography.legalLink)
+                .font(RMTypography.caption)
                 .underline()
                 .foregroundStyle(RMColors.gold)
                 .padding(.vertical, hitSlop)
