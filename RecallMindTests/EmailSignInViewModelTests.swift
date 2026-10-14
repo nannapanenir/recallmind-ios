@@ -152,14 +152,20 @@ struct EmailSignInViewModelTests {
 
         #expect(viewModel.banner == .unableToConnect)
         #expect(viewModel.banner?.title == "Unable to connect")
+        #expect(viewModel.banner?.message == "Check your internet connection.")
     }
 
-    @Test func unexpectedErrorShowsUnableToConnect() async {
+    @Test func unexpectedErrorIsNotClassifiedAsNetwork() async {
         let viewModel = makeViewModel(signInError: UnexpectedFailure())
 
-        _ = await viewModel.signIn()
+        let outcome = await viewModel.signIn()
 
-        #expect(viewModel.banner == .unableToConnect)
+        #expect(outcome == nil)
+        #expect(viewModel.banner == .unexpectedError)
+        #expect(viewModel.banner != .unableToConnect)
+        // Copy is pending AUTH 08 / design.
+        #expect(viewModel.banner?.title == nil)
+        #expect(viewModel.banner?.message == nil)
         #expect(!viewModel.isSubmitting)
     }
 
