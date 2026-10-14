@@ -117,7 +117,7 @@ struct EmailSignInView: View {
                     title: title,
                     message: banner.message,
                     actionTitle: banner == .unableToConnect ? "Try Again" : nil,
-                    action: banner == .unableToConnect ? submit : nil
+                    action: banner == .unableToConnect ? { submit() } : nil
                 )
             }
 

@@ -84,6 +84,17 @@ struct EmailSignInViewModelTests {
         #expect(viewModel.emailError == nil)
     }
 
+    @Test func reassigningSameEmailKeepsBlurError() {
+        let viewModel = EmailSignInViewModel(repository: SpyAuthRepository(result: .success(user)))
+        viewModel.email = "test@example"
+
+        viewModel.validateEmail()
+        // TextField writes the unchanged value back when it loses focus.
+        viewModel.email = "test@example"
+
+        #expect(viewModel.emailError == .invalidEmail)
+    }
+
     @Test func blurValidationIgnoresEmptyEmail() {
         let viewModel = EmailSignInViewModel(repository: SpyAuthRepository(result: .success(user)))
 

@@ -50,7 +50,10 @@ final class EmailSignInViewModel {
     }
 
     var email = "" {
-        didSet { emailError = nil }
+        // TextField re-assigns the unchanged text when it loses focus; only a real edit clears the error.
+        didSet {
+            if email != oldValue { emailError = nil }
+        }
     }
     var password = ""
     var isPasswordVisible = false
