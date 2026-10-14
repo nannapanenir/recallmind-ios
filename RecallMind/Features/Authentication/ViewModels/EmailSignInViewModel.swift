@@ -26,12 +26,17 @@ final class EmailSignInViewModel {
         case incorrectCredentials
         case unableToConnect
         case tooManyAttempts
+        /// An error that is not one of the classified `AuthError` cases.
+        /// PENDING AUTH 08 / design: no approved copy yet, so nothing is shown.
+        case unexpectedError
 
-        var title: String {
+        /// `nil` when the state has no approved copy.
+        var title: String? {
             switch self {
             case .incorrectCredentials: "Incorrect email or password."
             case .unableToConnect: "Unable to connect"
             case .tooManyAttempts: "Too many attempts. Try again later."
+            case .unexpectedError: nil
             }
         }
 
@@ -39,7 +44,7 @@ final class EmailSignInViewModel {
             switch self {
             case .incorrectCredentials: "Check your details and try again."
             case .unableToConnect: "Check your internet connection."
-            case .tooManyAttempts: nil
+            case .tooManyAttempts, .unexpectedError: nil
             }
         }
     }
@@ -93,11 +98,12 @@ final class EmailSignInViewModel {
             banner = .incorrectCredentials
         } catch AuthError.tooManyAttempts {
             banner = .tooManyAttempts
+        } catch AuthError.network {
+            banner = .unableToConnect
         } catch is CancellationError {
             // The screen went away; nothing to show.
         } catch {
-            // Network and unexpected failures share the approved connection message.
-            banner = .unableToConnect
+            banner = .unexpectedError
         }
         return nil
     }

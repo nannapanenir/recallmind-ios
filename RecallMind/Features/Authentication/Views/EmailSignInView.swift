@@ -60,8 +60,8 @@ struct EmailSignInView: View {
             }
         }
         .onChange(of: viewModel.banner) { _, banner in
-            if let banner {
-                UIAccessibility.post(notification: .announcement, argument: banner.title)
+            if let title = banner?.title {
+                UIAccessibility.post(notification: .announcement, argument: title)
             }
         }
     }
@@ -110,10 +110,11 @@ struct EmailSignInView: View {
                 TextLinkButton(title: "Forgot password?", action: onForgotPassword)
             }
 
-            if let banner = viewModel.banner {
+            // Banners without approved copy (unexpectedError) are not shown yet.
+            if let banner = viewModel.banner, let title = banner.title {
                 RMErrorBanner(
                     symbol: banner == .unableToConnect ? .offline : .error,
-                    title: banner.title,
+                    title: title,
                     message: banner.message,
                     actionTitle: banner == .unableToConnect ? "Try Again" : nil,
                     action: banner == .unableToConnect ? submit : nil
