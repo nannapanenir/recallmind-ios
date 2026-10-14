@@ -7,7 +7,7 @@ import Observation
 final class EmailSignInViewModel {
     enum Outcome: Equatable {
         case signedIn(User)
-        /// Pending AUTH 04 — Verify Email.
+        /// Routes to AUTH 04 — Verify Email.
         case requiresEmailVerification(email: String)
     }
 

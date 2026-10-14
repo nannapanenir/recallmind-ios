@@ -10,4 +10,10 @@ protocol AuthRepository: Sendable {
     /// Also succeeds for an email that is already registered: the result never reveals
     /// whether an account exists (AUTH 08).
     func signUp(email: String, password: String) async throws
+
+    /// Sends a new verification email to `email`.
+    func resendVerificationEmail(to email: String) async throws
+
+    /// Returns the signed-in user once `email` is verified, or `nil` while it is not yet.
+    func checkEmailVerification(email: String) async throws -> User?
 }
