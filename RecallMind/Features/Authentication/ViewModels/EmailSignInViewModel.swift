@@ -1,0 +1,112 @@
+import Foundation
+import Observation
+
+/// AUTH 02 form state, validation and submission.
+@MainActor
+@Observable
+final class EmailSignInViewModel {
+    enum Outcome: Equatable {
+        case signedIn(User)
+        /// Pending AUTH 04 — Verify Email.
+        case requiresEmailVerification(email: String)
+    }
+
+    enum FieldError: Equatable {
+        case invalidEmail
+
+        var message: String {
+            switch self {
+            case .invalidEmail: "Enter a valid email address."
+            }
+        }
+    }
+
+    /// AUTH 08 messages shown inline above the Sign In button.
+    enum Banner: Equatable {
+        case incorrectCredentials
+        case unableToConnect
+        case tooManyAttempts
+
+        var title: String {
+            switch self {
+            case .incorrectCredentials: "Incorrect email or password."
+            case .unableToConnect: "Unable to connect"
+            case .tooManyAttempts: "Too many attempts. Try again later."
+            }
+        }
+
+        var message: String? {
+            switch self {
+            case .incorrectCredentials: "Check your details and try again."
+            case .unableToConnect: "Check your internet connection."
+            case .tooManyAttempts: nil
+            }
+        }
+    }
+
+    var email = "" {
+        didSet { emailError = nil }
+    }
+    var password = ""
+    var isPasswordVisible = false
+
+    private(set) var emailError: FieldError?
+    private(set) var banner: Banner?
+    private(set) var isSubmitting = false
+
+    private let repository: any AuthRepository
+
+    init(repository: any AuthRepository) {
+        self.repository = repository
+    }
+
+    /// Sign In stays disabled until both required fields have content.
+    var canSubmit: Bool {
+        !trimmedEmail.isEmpty && !password.isEmpty && !isSubmitting
+    }
+
+    /// Called when the email field loses focus. Never called while typing.
+    func validateEmail() {
+        guard !trimmedEmail.isEmpty else { return }
+        emailError = Self.isValidEmail(trimmedEmail) ? nil : .invalidEmail
+    }
+
+    /// Returns an outcome for the flow to route, or `nil` when the user stays on AUTH 02.
+    func signIn() async -> Outcome? {
+        guard canSubmit else { return nil }
+        guard Self.isValidEmail(trimmedEmail) else {
+            emailError = .invalidEmail
+            return nil
+        }
+
+        let email = trimmedEmail
+        banner = nil
+        isSubmitting = true
+        defer { isSubmitting = false }
+
+        do {
+            let user = try await repository.signIn(email: email, password: password)
+            return .signedIn(user)
+        } catch AuthError.emailNotVerified {
+            return .requiresEmailVerification(email: email)
+        } catch AuthError.invalidCredentials {
+            banner = .incorrectCredentials
+        } catch AuthError.tooManyAttempts {
+            banner = .tooManyAttempts
+        } catch is CancellationError {
+            // The screen went away; nothing to show.
+        } catch {
+            // Network and unexpected failures share the approved connection message.
+            banner = .unableToConnect
+        }
+        return nil
+    }
+
+    private var trimmedEmail: String {
+        email.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static func isValidEmail(_ email: String) -> Bool {
+        email.wholeMatch(of: #/[^\s@]+@[^\s@]+\.[^\s@]+/#) != nil
+    }
+}

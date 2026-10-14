@@ -23,4 +23,8 @@ final class AppState {
             authStatus = .signedOut
         }
     }
+
+    func completeSignIn(with user: User) {
+        authStatus = .signedIn(user)
+    }
 }

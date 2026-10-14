@@ -33,4 +33,13 @@ struct AppStateTests {
 
         #expect(appState.authStatus == .signedOut)
     }
+
+    @Test func completeSignInResultsInSignedIn() {
+        let user = User(id: UUID(), email: "test@example.com")
+        let appState = AppState()
+
+        appState.completeSignIn(with: user)
+
+        #expect(appState.authStatus == .signedIn(user))
+    }
 }
