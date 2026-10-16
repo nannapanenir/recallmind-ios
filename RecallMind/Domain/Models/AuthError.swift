@@ -10,4 +10,8 @@ enum AuthError: Error, Equatable {
     case network
     /// The password reset link is no longer valid.
     case resetLinkExpired
+    /// The email verification link is no longer valid.
+    case verificationLinkExpired
+    /// The persisted session can no longer be restored; the user must sign in again.
+    case sessionExpired
 }

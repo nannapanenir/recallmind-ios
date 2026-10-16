@@ -42,4 +42,32 @@ struct AppStateTests {
 
         #expect(appState.authStatus == .signedIn(user))
     }
+
+    @Test func expiredSessionSignsOutWithNotice() async {
+        let appState = AppState()
+        let repository = MockAuthRepository(error: AuthError.sessionExpired, latency: .zero)
+
+        await appState.restoreSession(using: repository)
+
+        #expect(appState.authStatus == .signedOut)
+        #expect(appState.isSessionExpired)
+    }
+
+    @Test func otherRestoreErrorsDoNotShowSessionExpired() async {
+        let appState = AppState()
+        let repository = MockAuthRepository(error: RestoreFailure(), latency: .zero)
+
+        await appState.restoreSession(using: repository)
+
+        #expect(!appState.isSessionExpired)
+    }
+
+    @Test func signingInClearsSessionExpired() async {
+        let appState = AppState()
+        await appState.restoreSession(using: MockAuthRepository(error: AuthError.sessionExpired, latency: .zero))
+
+        appState.completeSignIn(with: User(id: UUID(), email: "test@example.com"))
+
+        #expect(!appState.isSessionExpired)
+    }
 }

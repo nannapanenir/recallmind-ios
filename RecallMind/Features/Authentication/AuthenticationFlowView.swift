@@ -33,6 +33,7 @@ struct AuthenticationFlowView: View {
                 }
             )
             .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .top) { sessionExpiredNotice }
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .emailSignIn:
@@ -75,6 +76,17 @@ struct AuthenticationFlowView: View {
                 path.append(.createAccount)
             }
         )
+        .safeAreaInset(edge: .top) { sessionExpiredNotice }
+    }
+
+    /// AUTH 08: shown at the top of AUTH 01 and AUTH 02 after an expired session signed the user out.
+    @ViewBuilder
+    private var sessionExpiredNotice: some View {
+        if appState.isSessionExpired {
+            RMNotice(systemImage: "clock", title: "Your session has expired.", message: "Please sign in again.")
+                .padding(.horizontal, RMSpacing.readingInset)
+                .padding(.vertical, RMSpacing.xs)
+        }
     }
 
     private var createAccount: some View {

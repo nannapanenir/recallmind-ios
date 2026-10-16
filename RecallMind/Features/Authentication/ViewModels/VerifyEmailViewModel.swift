@@ -124,6 +124,13 @@ final class VerifyEmailViewModel {
 
     private func fail(_ action: Action, _ error: any Error) {
         banner = AuthBanner(error: error)
-        failedAction = banner == nil ? nil : action
+        if banner == .verificationLinkExpired {
+            // AUTH 08: the expired link needs a new email now; the banner's "Resend Email" sends it.
+            cooldown.finish()
+            isEmailSentVisible = false
+            failedAction = .resend
+        } else {
+            failedAction = banner == nil ? nil : action
+        }
     }
 }

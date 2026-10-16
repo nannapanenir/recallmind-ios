@@ -149,4 +149,28 @@ struct VerifyEmailViewModelTests {
         #expect(viewModel.banner == .unexpectedError)
         #expect(viewModel.banner?.title == nil)
     }
+
+    @Test func expiredVerificationLinkOffersImmediateResend() async {
+        let spy = SpyAuthRepository()
+        spy.verificationResult = .failure(AuthError.verificationLinkExpired)
+        let viewModel = makeViewModel(spy: spy)
+        #expect(!viewModel.canResend)
+
+        _ = await viewModel.checkVerification()
+
+        #expect(viewModel.banner == .verificationLinkExpired)
+        #expect(viewModel.banner?.title == "This link has expired")
+        #expect(viewModel.banner?.message == "Send a new verification email to finish creating your account.")
+        #expect(viewModel.banner?.actionTitle == "Resend Email")
+        #expect(viewModel.failedAction == .resend)
+        #expect(viewModel.canResend)
+        #expect(!viewModel.isEmailSentVisible)
+
+        await viewModel.resend()
+
+        #expect(spy.resendEmails == [email])
+        #expect(viewModel.banner == nil)
+        #expect(viewModel.isEmailSentVisible)
+        #expect(viewModel.resendSecondsRemaining == 30)
+    }
 }

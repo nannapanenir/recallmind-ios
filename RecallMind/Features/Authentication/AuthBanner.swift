@@ -8,6 +8,8 @@ enum AuthBanner: Equatable {
     case tooManyAttempts
     /// AUTH 07: the password reset link is no longer valid.
     case resetLinkExpired
+    /// AUTH 04: the email verification link is no longer valid.
+    case verificationLinkExpired
     /// An error that is not one of the classified `AuthError` cases.
     /// PENDING AUTH 08 / design: no approved copy yet, so nothing is shown.
     case unexpectedError
@@ -19,6 +21,7 @@ enum AuthBanner: Equatable {
         case AuthError.network: self = .unableToConnect
         case AuthError.tooManyAttempts: self = .tooManyAttempts
         case AuthError.resetLinkExpired: self = .resetLinkExpired
+        case AuthError.verificationLinkExpired: self = .verificationLinkExpired
         case is CancellationError: return nil
         default: self = .unexpectedError
         }
@@ -30,7 +33,7 @@ enum AuthBanner: Equatable {
         case .incorrectCredentials: "Incorrect email or password."
         case .unableToConnect: "Unable to connect"
         case .tooManyAttempts: "Too many attempts. Try again later."
-        case .resetLinkExpired: "This link has expired"
+        case .resetLinkExpired, .verificationLinkExpired: "This link has expired"
         case .unexpectedError: nil
         }
     }
@@ -40,6 +43,7 @@ enum AuthBanner: Equatable {
         case .incorrectCredentials: "Check your details and try again."
         case .unableToConnect: "Check your internet connection."
         case .resetLinkExpired: "Request a new password reset link."
+        case .verificationLinkExpired: "Send a new verification email to finish creating your account."
         case .tooManyAttempts, .unexpectedError: nil
         }
     }
@@ -49,6 +53,7 @@ enum AuthBanner: Equatable {
         switch self {
         case .unableToConnect: "Try Again"
         case .resetLinkExpired: "Send a new link"
+        case .verificationLinkExpired: "Resend Email"
         case .incorrectCredentials, .tooManyAttempts, .unexpectedError: nil
         }
     }

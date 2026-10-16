@@ -50,6 +50,12 @@ final class ResendCooldown {
         secondsRemaining = seconds
         cycle += 1
     }
+
+    /// Ends the cooldown early, e.g. when the last link turned out to be expired.
+    func finish() {
+        secondsRemaining = 0
+        cycle += 1
+    }
 }
 
 extension OpenURLAction {

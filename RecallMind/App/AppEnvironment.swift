@@ -6,7 +6,18 @@ struct AppEnvironment: Sendable {
 }
 
 extension AppEnvironment {
-    static let mock = AppEnvironment(authRepository: MockAuthRepository())
+    static let mock = AppEnvironment(authRepository: MockAuthRepository(error: debugRestoreError))
+
+    /// Debug builds only: launching with `-RMSessionExpiredPreview YES` makes the mock session
+    /// restore fail as expired, to check the AUTH 08 session-expired notice.
+    private static var debugRestoreError: (any Error)? {
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "RMSessionExpiredPreview") {
+            return AuthError.sessionExpired
+        }
+        #endif
+        return nil
+    }
 }
 
 private struct AppEnvironmentKey: EnvironmentKey {
