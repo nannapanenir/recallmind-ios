@@ -3,80 +3,92 @@
 Visual source of truth: Claude Design canvas (artboards `AUTH-01` … `AUTH-08`, `DS-01` … `DS-13`).
 Locked Design System v22 tokens win over small artboard differences.
 
-## Screens
+**Status: Authentication complete (AUTH 01–07B, AUTH 08 states) on the mock repository.**
 
-| Screen | Status | Files |
+## Screens (`RecallMind/Features/Authentication/`)
+
+| Screen | Files | Notes |
 |---|---|---|
-| AUTH 01 Welcome | Done, locked | `Views/WelcomeView.swift` |
-| AUTH 02 Email Sign In | Done, simulator-validated | `Views/EmailSignInView.swift`, `ViewModels/EmailSignInViewModel.swift` |
-| AUTH 03 Create Account | Done, simulator-validated | `Views/CreateAccountView.swift`, `ViewModels/CreateAccountViewModel.swift` |
-| AUTH 04 Verify Email | Done, simulator-validated | `Views/VerifyEmailView.swift`, `ViewModels/VerifyEmailViewModel.swift` |
-| AUTH 05 Forgot Password | Done, simulator-validated | `Views/ForgotPasswordView.swift`, `ViewModels/ForgotPasswordViewModel.swift` |
-| AUTH 06 Check Your Email | Not started | — |
-| AUTH 07 Reset Password | Not started | — |
-| AUTH 07B Password Updated | Not started | — |
-| AUTH 08 States | Applied per screen | `AuthBanner.swift` + per-screen field/notice copy |
+| AUTH 01 Welcome | `Views/WelcomeView` | locked |
+| AUTH 02 Email Sign In | `Views/EmailSignInView`, `ViewModels/EmailSignInViewModel` | |
+| AUTH 03 Create Account | `Views/CreateAccountView`, `ViewModels/CreateAccountViewModel` | |
+| AUTH 04 Verify Email | `Views/VerifyEmailView`, `ViewModels/VerifyEmailViewModel` | no back button |
+| AUTH 05 Forgot Password | `Views/ForgotPasswordView`, `ViewModels/ForgotPasswordViewModel` | |
+| AUTH 06 Check Your Email | `Views/CheckYourEmailView`, `ViewModels/CheckYourEmailViewModel` | |
+| AUTH 07 Reset Password | `Views/ResetPasswordView`, `ViewModels/ResetPasswordViewModel` | no back button |
+| AUTH 07B Password Updated | `Views/PasswordUpdatedView` | no view model, no back button |
 
-Paths are under `RecallMind/Features/Authentication/`.
+All simulator-validated on iPhone 17 Pro (Xcode 27.1, iOS 26.5 runtime).
+
+## AUTH 08 (states, not a screen)
+
+- `AuthBanner` (`AuthBanner.swift`): error banners with approved copy and action — incorrect credentials,
+  unable to connect (Try Again), too many attempts, reset link expired (Send a new link),
+  verification link expired (Resend Email), `unexpectedError` (no copy → not shown).
+- `AuthFieldError`: invalid email, password too short, passwords don’t match (blur + submit, never while typing).
+- Notices (`RMNotice`): AUTH 04 “Verify your email to continue.” / “We couldn’t confirm your email yet.”;
+  session expired at the top of AUTH 01/02 (`AppState.isSessionExpired`).
+- Success: “Email sent” chip (AUTH 04), AUTH 07B screen. Loading labels on every primary action.
+- Sign-up and reset requests succeed for every email (never reveal an account).
 
 ## Routes (`AuthenticationFlowView`, auth-local `NavigationStack` path)
 
 ```
-AUTH 01 ── Continue with Email ──▶ AUTH 02
-AUTH 02 ── Create account ───────▶ AUTH 03 ── success ──▶ AUTH 04 (.accountCreated)
-AUTH 02 ── sign-in, unverified ──▶ AUTH 04 (.signInUnverified, shows notice)
-AUTH 02 ── Forgot password? ─────▶ AUTH 05 ── success ──▶ (AUTH 06 pending: .resetLinkSent(email:))
-AUTH 03 / 04 / 05 ── Sign in / Back to Sign In ──▶ pop to AUTH 02
-AUTH 04 ── Use a different email ──▶ AUTH 03 (pop, or replace when reached from AUTH 02)
-AUTH 04 ── I’ve verified (verified) ──▶ signed in (Home; Quick Setup 69 not built)
-AUTH 02 ── signed in ──▶ Home
+AUTH 01 ─▶ AUTH 02 ─┬─ Create account ─▶ AUTH 03 ─▶ AUTH 04 (.accountCreated) ─ verified ─▶ Home
+                    ├─ sign-in, unverified ─▶ AUTH 04 (.signInUnverified, notice)
+                    ├─ Forgot password? ─▶ AUTH 05 ─▶ AUTH 06
+                    └─ signed in ─▶ Home
+Reset link ─▶ AUTH 07 ─▶ AUTH 07B ─ Continue to RecallMind ─▶ Home (signed in)
+AUTH 07 expired ─ Send a new link ─▶ AUTH 05
+AUTH 03/04/05/06 Sign in / Back to Sign In ─▶ pop to AUTH 02
+AUTH 04 Use a different email ─▶ AUTH 03
 ```
 
-No global router; AUTH 04 hides the back button by design.
+No global router. Debug-only launch arguments stand in for missing deep links:
+`-RMResetPasswordPreview <token>` opens AUTH 07 (`expired` → expired state);
+`-RMSessionExpiredPreview YES` makes the mock session restore expire.
 
-## Shared components (`RecallMind/DesignSystem/Components/`)
+## Shared components
 
-`RMPrimaryButton`, `RMSecondaryButton`, `RMTextButton` (.gold / .secondary), `RMTextField`,
-`RMPasswordField`, `RMFieldError`, `RMFieldHint`, `RMErrorBanner`, `RMNotice`, `RMSuccessChip`,
-`RMHeroIcon`, `RMLegalFooter`, `RMPressableButtonStyle`, `RMControlMetrics`.
-Auth-only: `AuthBanner` / `AuthBannerView` / `.announcesAuthBanner`, `AuthValidation`.
+Design System (`DesignSystem/Components/`): `RMPrimaryButton`, `RMSecondaryButton`, `RMTextButton`
+(.gold/.secondary), `RMTextField`, `RMPasswordField`, `RMFieldError`, `RMFieldHint`, `RMErrorBanner`,
+`RMNotice`, `RMSuccessChip`, `RMHeroIcon` (.gold/.success), `RMLegalFooter`, `RMPressableButtonStyle`.
+Auth-only: `AuthBanner`/`AuthBannerView`/`.announcesAuthBanner`, `AuthFieldError`, `AuthValidation`,
+`ResendCooldown` (30 s, AUTH 04/06), `OpenURLAction.openMail()`.
 
 ## `AuthRepository`
 
-- `restoreSession() -> User?`
-- `signIn(email:password:) -> User` — `invalidCredentials` for unknown email and wrong password
-- `signUp(email:password:)` — succeeds for registered emails too (never reveals an account)
+- `restoreSession() -> User?` — `AuthError.sessionExpired` shows the session notice
+- `signIn(email:password:) -> User` — `invalidCredentials` for unknown email and wrong password; `emailNotVerified` → AUTH 04
+- `signUp(email:password:)`
 - `resendVerificationEmail(to:)`
-- `checkEmailVerification(email:) -> User?` — `nil` while unverified
-- `requestPasswordReset(email:)` — succeeds for unknown emails too
+- `checkEmailVerification(email:) -> User?` — `nil` while unverified; may throw `verificationLinkExpired`
+- `requestPasswordReset(email:)`
+- `resetPassword(to:context:) -> User` — `PasswordResetContext(email, token)`; throws `resetLinkExpired`
 
 ## `MockAuthRepository` (default app environment)
 
-Every call waits `latency` (400 ms default) and succeeds unless configured:
-`user`/`error` (restore), `signInUser`/`signInError`, `signUpError`, `resendError`,
-`isEmailVerified` (default `true`) / `verificationError`, `passwordResetError`.
-No email is sent; no backend.
-
-Tests use `RecallMindTests/Support/SpyAuthRepository.swift` (records calls, configurable results).
+Every call waits `latency` (400 ms) and succeeds unless configured: `user`/`error` (restore),
+`signInUser`/`signInError`, `signUpError`, `resendError`, `isEmailVerified` (default `true`)/`verificationError`,
+`passwordResetError`, `resetPasswordError`; reset token `"expired"` throws `resetLinkExpired`. No email, no backend.
+Tests use `RecallMindTests/Support/SpyAuthRepository.swift`.
 
 ## Tests
 
-52 passing (Swift Testing): AppState 4 · EmailSignIn 15 · CreateAccount 14 · VerifyEmail 11 · ForgotPassword 8.
+71 passing (Swift Testing): AppState 7 · EmailSignIn 15 · CreateAccount 14 · VerifyEmail 12 ·
+ForgotPassword 8 · CheckYourEmail 6 · ResetPassword 9.
 
-## Open issues
+## Open items
 
-- Inter fonts not bundled: all weights fall back to SF Pro Regular (titles and emphasis look unbolded).
-- `AuthBanner.unexpectedError` has no approved copy; nothing is shown.
-- AUTH 04 verified → design goes to 69 Quick Setup; app signs in to Home until it exists.
-- AUTH 04 enabled resend label uses AUTH 08's “Resend Email” (artboard only shows the countdown).
-- AUTH 03 password field has no placeholder (none in the artboard); email placeholder reuses DS 07 “you@example.com”.
-- Expired verification / reset link states (AUTH 08) need deep links; not implemented.
-- Terms of Service / Privacy Policy destinations not wired (AUTH 01, AUTH 03).
-- Open Mail uses the `message://` URL; no Mail app in the simulator.
-- iOS AutoFill shows “Use Strong Password?” on AUTH 03 (`.newPassword`) and save/update prompts after sign-in.
+- Inter fonts not bundled: every weight falls back to SF Pro Regular.
+- No approved copy: generic unexpected error (not shown); a separate resend-limit message (rate limits use “Too many attempts”).
+- Real backend, reset-link / verification deep links (Universal Links) and session persistence not built.
+- Sign in with Apple not implemented (AUTH 08 Apple states pending with it).
+- AUTH 04 verified → design goes to 69 Quick Setup; app goes to Home until it exists.
+- Terms of Service / Privacy Policy destinations not wired.
+- AUTH 07 expired banner action is inline gold text, not the DS 06 pill shown on AUTH 08.
 - Not yet checked on a physical iPhone or at large Dynamic Type sizes.
 
-## Next
+## Next product step
 
-AUTH 06 Check Your Email (consumes `ForgotPasswordViewModel.Outcome.resetLinkSent`), AUTH 07 Reset Password,
-AUTH 07B Password Updated, then remaining AUTH 08 states (expired links, session expired, Apple sign-in).
+Quick Setup (69), then the signed-in app (Home / Notes / Settings); backend integration of `AuthRepository`.
