@@ -8,4 +8,6 @@ enum AuthError: Error, Equatable {
     case tooManyAttempts
     /// The service could not be reached.
     case network
+    /// The password reset link is no longer valid.
+    case resetLinkExpired
 }

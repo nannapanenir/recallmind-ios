@@ -68,7 +68,7 @@ struct CheckYourEmailView: View {
     private var actions: some View {
         VStack(spacing: RMSpacing.sm) {
             if let banner = viewModel.banner {
-                AuthBannerView(banner: banner, retry: resend)
+                AuthBannerView(banner: banner, action: resend)
             }
 
             RMPrimaryButton("Open Mail") { openURL.openMail() }

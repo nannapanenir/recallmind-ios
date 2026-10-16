@@ -20,4 +20,8 @@ protocol AuthRepository: Sendable {
     /// Sends a password reset link to `email`.
     /// Also succeeds when no account uses the email: the result never reveals whether one exists.
     func requestPasswordReset(email: String) async throws
+
+    /// Sets a new password from a reset link and returns the signed-in user (AUTH 07B continues into the app).
+    /// Throws `AuthError.resetLinkExpired` when the link is no longer valid.
+    func resetPassword(to newPassword: String, context: PasswordResetContext) async throws -> User
 }

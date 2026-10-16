@@ -8,11 +8,12 @@ struct AuthenticationFlowView: View {
         case verifyEmail(email: String, context: VerifyEmailViewModel.Context)
         case forgotPassword
         case checkYourEmail(email: String)
+        case resetPassword(PasswordResetContext)
     }
 
     @Environment(AppState.self) private var appState
     @Environment(\.appEnvironment) private var environment
-    @State private var path: [Route] = []
+    @State private var path: [Route] = Self.initialPath
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -43,6 +44,8 @@ struct AuthenticationFlowView: View {
                     forgotPassword
                 case .checkYourEmail(let email):
                     checkYourEmail(email: email)
+                case .resetPassword(let context):
+                    resetPassword(context: context)
                 }
             }
         }
@@ -113,6 +116,20 @@ struct AuthenticationFlowView: View {
         )
     }
 
+    private func resetPassword(context: PasswordResetContext) -> some View {
+        ResetPasswordView(
+            viewModel: ResetPasswordViewModel(context: context, repository: environment.authRepository),
+            onPasswordUpdated: { _ in
+                // Pending AUTH 07B — Password Updated.
+            },
+            onRequestNewLink: {
+                // Expired link: AUTH 07 is replaced by AUTH 05.
+                path.removeLast()
+                path.append(.forgotPassword)
+            }
+        )
+    }
+
     /// Back to AUTH 03 when it is the previous screen; otherwise AUTH 04 is replaced by AUTH 03.
     private func showCreateAccount() {
         path.removeLast()
@@ -128,6 +145,18 @@ struct AuthenticationFlowView: View {
         } else {
             path = [.emailSignIn]
         }
+    }
+
+    /// Debug builds only: launching with `-RMResetPasswordPreview <token>` opens AUTH 07 with a mock
+    /// reset link, standing in for the reset-link deep link (not built yet). `expired` gives the
+    /// expired-link state with `MockAuthRepository`.
+    private static var initialPath: [Route] {
+        #if DEBUG
+        if let token = UserDefaults.standard.string(forKey: "RMResetPasswordPreview") {
+            return [.emailSignIn, .resetPassword(PasswordResetContext(email: "ramgopal@example.com", token: token))]
+        }
+        #endif
+        return []
     }
 }
 

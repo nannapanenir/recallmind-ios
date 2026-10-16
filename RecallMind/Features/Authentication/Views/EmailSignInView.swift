@@ -106,7 +106,7 @@ struct EmailSignInView: View {
             }
 
             if let banner = viewModel.banner {
-                AuthBannerView(banner: banner, retry: submit)
+                AuthBannerView(banner: banner, action: submit)
             }
 
             RMPrimaryButton("Sign In", loadingTitle: "Signing you in…", isLoading: viewModel.isSubmitting, action: submit)

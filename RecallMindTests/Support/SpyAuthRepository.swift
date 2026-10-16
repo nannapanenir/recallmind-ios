@@ -10,6 +10,7 @@ final class SpyAuthRepository: AuthRepository {
     var resendResult: Result<Void, any Error> = .success(())
     var verificationResult: Result<User?, any Error> = .success(nil)
     var passwordResetResult: Result<Void, any Error> = .success(())
+    var resetPasswordResult: Result<User, any Error> = .failure(AuthError.resetLinkExpired)
 
     private(set) var signInEmails: [String] = []
     private(set) var signUpEmails: [String] = []
@@ -17,6 +18,8 @@ final class SpyAuthRepository: AuthRepository {
     private(set) var resendEmails: [String] = []
     private(set) var verificationChecks: [String] = []
     private(set) var passwordResetEmails: [String] = []
+    private(set) var newPasswords: [String] = []
+    private(set) var resetContexts: [PasswordResetContext] = []
 
     private let delay: Duration
 
@@ -56,5 +59,12 @@ final class SpyAuthRepository: AuthRepository {
         passwordResetEmails.append(email)
         try await Task.sleep(for: delay)
         try passwordResetResult.get()
+    }
+
+    func resetPassword(to newPassword: String, context: PasswordResetContext) async throws -> User {
+        newPasswords.append(newPassword)
+        resetContexts.append(context)
+        try await Task.sleep(for: delay)
+        return try resetPasswordResult.get()
     }
 }

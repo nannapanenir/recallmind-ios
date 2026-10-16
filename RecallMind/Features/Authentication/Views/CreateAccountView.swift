@@ -133,7 +133,7 @@ struct CreateAccountView: View {
             .onSubmit(submit)
 
             if let banner = viewModel.banner {
-                AuthBannerView(banner: banner, retry: submit)
+                AuthBannerView(banner: banner, action: submit)
             }
 
             RMPrimaryButton(

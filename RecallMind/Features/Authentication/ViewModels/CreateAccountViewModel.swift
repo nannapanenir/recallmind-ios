@@ -10,19 +10,7 @@ final class CreateAccountViewModel {
         case verificationRequired(email: String)
     }
 
-    enum FieldError: Equatable {
-        case invalidEmail
-        case passwordTooShort
-        case passwordsDontMatch
-
-        var message: String {
-            switch self {
-            case .invalidEmail: "Enter a valid email address."
-            case .passwordTooShort: "Use at least 8 characters."
-            case .passwordsDontMatch: "Passwords don’t match."
-            }
-        }
-    }
+    typealias FieldError = AuthFieldError
 
     // Fields re-assign their unchanged text when they lose focus; only a real edit clears an error.
     var email = "" {

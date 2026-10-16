@@ -1,6 +1,9 @@
 import Foundation
 
 struct MockAuthRepository: AuthRepository {
+    /// A reset link with this token is treated as expired (Debug launch argument `-RMResetPasswordPreview expired`).
+    static let expiredResetToken = "expired"
+
     private let user: User?
     private let error: (any Error)?
     private let signInUser: User?
@@ -10,6 +13,7 @@ struct MockAuthRepository: AuthRepository {
     private let isEmailVerified: Bool
     private let verificationError: (any Error)?
     private let passwordResetError: (any Error)?
+    private let resetPasswordError: (any Error)?
     private let latency: Duration
 
     /// Defaults to no active session and successful operations, each after ~400 ms.
@@ -24,6 +28,7 @@ struct MockAuthRepository: AuthRepository {
         isEmailVerified: Bool = true,
         verificationError: (any Error)? = nil,
         passwordResetError: (any Error)? = nil,
+        resetPasswordError: (any Error)? = nil,
         latency: Duration = .milliseconds(400)
     ) {
         self.user = user
@@ -35,6 +40,7 @@ struct MockAuthRepository: AuthRepository {
         self.isEmailVerified = isEmailVerified
         self.verificationError = verificationError
         self.passwordResetError = passwordResetError
+        self.resetPasswordError = resetPasswordError
         self.latency = latency
     }
 
@@ -85,5 +91,17 @@ struct MockAuthRepository: AuthRepository {
         if let passwordResetError {
             throw passwordResetError
         }
+    }
+
+    /// Succeeds unless `resetPasswordError` is set or the link uses `expiredResetToken`.
+    func resetPassword(to newPassword: String, context: PasswordResetContext) async throws -> User {
+        try await Task.sleep(for: latency)
+        if context.token == Self.expiredResetToken {
+            throw AuthError.resetLinkExpired
+        }
+        if let resetPasswordError {
+            throw resetPasswordError
+        }
+        return signInUser ?? User(id: UUID(), email: context.email)
     }
 }

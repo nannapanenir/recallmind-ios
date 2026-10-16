@@ -91,7 +91,7 @@ struct VerifyEmailView: View {
             }
 
             if let banner = viewModel.banner {
-                AuthBannerView(banner: banner, retry: retry)
+                AuthBannerView(banner: banner, action: retry)
             }
 
             RMPrimaryButton("Open Mail") { openURL.openMail() }
