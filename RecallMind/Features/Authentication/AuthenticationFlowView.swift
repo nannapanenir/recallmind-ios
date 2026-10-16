@@ -9,6 +9,7 @@ struct AuthenticationFlowView: View {
         case forgotPassword
         case checkYourEmail(email: String)
         case resetPassword(PasswordResetContext)
+        case passwordUpdated(User)
     }
 
     @Environment(AppState.self) private var appState
@@ -46,6 +47,11 @@ struct AuthenticationFlowView: View {
                     checkYourEmail(email: email)
                 case .resetPassword(let context):
                     resetPassword(context: context)
+                case .passwordUpdated(let user):
+                    PasswordUpdatedView {
+                        // AUTH 07B "Continue to RecallMind" goes to Home, signed in, as designed.
+                        appState.completeSignIn(with: user)
+                    }
                 }
             }
         }
@@ -119,8 +125,10 @@ struct AuthenticationFlowView: View {
     private func resetPassword(context: PasswordResetContext) -> some View {
         ResetPasswordView(
             viewModel: ResetPasswordViewModel(context: context, repository: environment.authRepository),
-            onPasswordUpdated: { _ in
-                // Pending AUTH 07B — Password Updated.
+            onPasswordUpdated: { user in
+                // The reset link is spent: AUTH 07 is replaced by AUTH 07B.
+                path.removeLast()
+                path.append(.passwordUpdated(user))
             },
             onRequestNewLink: {
                 // Expired link: AUTH 07 is replaced by AUTH 05.
