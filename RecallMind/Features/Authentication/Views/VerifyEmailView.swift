@@ -94,10 +94,10 @@ struct VerifyEmailView: View {
                 AuthBannerView(banner: banner, retry: retry)
             }
 
-            RMPrimaryButton("Open Mail", action: openMail)
+            RMPrimaryButton("Open Mail") { openURL.openMail() }
 
             RMSecondaryButton(
-                resendTitle,
+                viewModel.cooldown.buttonTitle,
                 loadingTitle: "Sending email…",
                 isLoading: viewModel.isResending,
                 action: resend
@@ -116,10 +116,6 @@ struct VerifyEmailView: View {
                 }
             }
         }
-    }
-
-    private var resendTitle: String {
-        viewModel.canResend ? "Resend Email" : "Resend available in \(viewModel.resendSecondsRemaining)s"
     }
 
     private var verifiedButton: some View {
@@ -144,12 +140,6 @@ struct VerifyEmailView: View {
             .font(RMTypography.body)
             .foregroundStyle(RMColors.textSecondary)
         RMTextButton("Sign in", action: onSignIn)
-    }
-
-    private func openMail() {
-        if let url = URL(string: "message://") {
-            openURL(url)
-        }
     }
 
     private func resend() {

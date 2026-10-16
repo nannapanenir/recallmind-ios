@@ -39,23 +39,17 @@ final class VerifyEmailViewModel {
         case checkVerification
     }
 
-    /// AUTH 04: "Resend available in 30s".
-    static let resendCooldownSeconds = 30
-
     let email: String
+    let cooldown: ResendCooldown
 
     private(set) var notice: Notice?
     private(set) var banner: AuthBanner?
     private(set) var failedAction: Action?
     private(set) var isEmailSentVisible = true
-    private(set) var resendSecondsRemaining = VerifyEmailViewModel.resendCooldownSeconds
-    /// Changes each time a cooldown starts, so the view restarts its countdown task.
-    private(set) var cooldownCycle = 0
     private(set) var isResending = false
     private(set) var isCheckingVerification = false
 
     private let repository: any AuthRepository
-    private let sleep: (Duration) async throws -> Void
 
     init(
         email: String,
@@ -65,26 +59,27 @@ final class VerifyEmailViewModel {
     ) {
         self.email = email
         self.repository = repository
-        self.sleep = sleep
+        self.cooldown = ResendCooldown(sleep: sleep)
         if context == .signInUnverified {
             notice = .verifyToContinue(email: email)
         }
     }
 
-    var canResend: Bool {
-        resendSecondsRemaining == 0 && !isResending
+    var resendSecondsRemaining: Int {
+        cooldown.secondsRemaining
     }
 
-    /// Counts the cooldown down once per second. Ends early when the task is cancelled.
+    /// Changes each time a cooldown starts, so the view restarts its countdown task.
+    var cooldownCycle: Int {
+        cooldown.cycle
+    }
+
+    var canResend: Bool {
+        !cooldown.isActive && !isResending
+    }
+
     func runResendCountdown() async {
-        while resendSecondsRemaining > 0 {
-            do {
-                try await sleep(.seconds(1))
-            } catch {
-                return
-            }
-            resendSecondsRemaining -= 1
-        }
+        await cooldown.run()
     }
 
     func resend() async {
@@ -97,8 +92,7 @@ final class VerifyEmailViewModel {
         do {
             try await repository.resendVerificationEmail(to: email)
             isEmailSentVisible = true
-            resendSecondsRemaining = Self.resendCooldownSeconds
-            cooldownCycle += 1
+            cooldown.restart()
         } catch {
             fail(.resend, error)
         }
