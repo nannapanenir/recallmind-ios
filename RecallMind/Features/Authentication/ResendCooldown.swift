@@ -7,7 +7,7 @@ import SwiftUI
 @MainActor
 @Observable
 final class ResendCooldown {
-    static let defaultSeconds = 30
+    nonisolated static let defaultSeconds = 30
 
     private(set) var secondsRemaining: Int
     /// Changes each time a cooldown restarts, so a view can restart its countdown task.
