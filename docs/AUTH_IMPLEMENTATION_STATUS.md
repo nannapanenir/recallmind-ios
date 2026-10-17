@@ -25,6 +25,8 @@ All simulator-validated on iPhone 17 Pro (Xcode 27.1, iOS 26.5 runtime).
 - `AuthBanner` (`AuthBanner.swift`): error banners with approved copy and action — incorrect credentials,
   unable to connect (Try Again), too many attempts, reset link expired (Send a new link),
   verification link expired (Resend Email), `unexpectedError` (no copy → not shown).
+  Expired-link actions use the DS 06 pill (`RMPillButton`): AUTH 04 “Resend Email” and AUTH 07
+  “Send a new link”; Try Again stays an inline gold text action.
 - `AuthFieldError`: invalid email, password too short, passwords don’t match (blur + submit, never while typing).
 - Notices (`RMNotice`): AUTH 04 “Verify your email to continue.” / “We couldn’t confirm your email yet.”;
   session expired at the top of AUTH 01/02 (`AppState.isSessionExpired`).
@@ -52,7 +54,7 @@ No global router. Debug-only launch arguments stand in for missing deep links:
 
 Design System (`DesignSystem/Components/`): `RMPrimaryButton`, `RMSecondaryButton`, `RMTextButton`
 (.gold/.secondary), `RMTextField`, `RMPasswordField`, `RMFieldError`, `RMFieldHint`, `RMErrorBanner`,
-`RMNotice`, `RMSuccessChip`, `RMHeroIcon` (.gold/.success), `RMLegalFooter`, `RMPressableButtonStyle`.
+`RMNotice`, `RMSuccessChip`, `RMHeroIcon` (.gold/.success), `RMLegalFooter`, `RMPillButton`, `RMPressableButtonStyle`.
 Auth-only: `AuthBanner`/`AuthBannerView`/`.announcesAuthBanner`, `AuthFieldError`, `AuthValidation`,
 `ResendCooldown` (30 s, AUTH 04/06), `OpenURLAction.openMail()`.
 
@@ -86,7 +88,6 @@ ForgotPassword 8 · CheckYourEmail 6 · ResetPassword 9.
 - Sign in with Apple not implemented (AUTH 08 Apple states pending with it).
 - AUTH 04 verified → design goes to 69 Quick Setup; app goes to Home until it exists.
 - Terms of Service / Privacy Policy destinations not wired.
-- AUTH 07 expired banner action is inline gold text, not the DS 06 pill shown on AUTH 08.
 - Not yet checked on a physical iPhone or at large Dynamic Type sizes.
 
 ## Next product step
