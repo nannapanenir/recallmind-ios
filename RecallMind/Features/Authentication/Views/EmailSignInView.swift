@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 /// AUTH 02 — Email Sign In.
 struct EmailSignInView: View {
@@ -59,11 +58,7 @@ struct EmailSignInView: View {
                 viewModel.validateEmail()
             }
         }
-        .onChange(of: viewModel.banner) { _, banner in
-            if let title = banner?.title {
-                UIAccessibility.post(notification: .announcement, argument: title)
-            }
-        }
+        .announcesAuthBanner(viewModel.banner)
     }
 
     private var header: some View {
@@ -107,18 +102,11 @@ struct EmailSignInView: View {
                 .submitLabel(.go)
                 .onSubmit(submit)
 
-                TextLinkButton(title: "Forgot password?", action: onForgotPassword)
+                RMTextButton("Forgot password?", action: onForgotPassword)
             }
 
-            // Banners without approved copy (unexpectedError) are not shown yet.
-            if let banner = viewModel.banner, let title = banner.title {
-                RMErrorBanner(
-                    symbol: banner == .unableToConnect ? .offline : .error,
-                    title: title,
-                    message: banner.message,
-                    actionTitle: banner == .unableToConnect ? "Try Again" : nil,
-                    action: banner == .unableToConnect ? submit : nil
-                )
+            if let banner = viewModel.banner {
+                AuthBannerView(banner: banner, action: submit)
             }
 
             RMPrimaryButton("Sign In", loadingTitle: "Signing you in…", isLoading: viewModel.isSubmitting, action: submit)
@@ -139,7 +127,7 @@ struct EmailSignInView: View {
         Text("Don’t have an account?")
             .font(RMTypography.body)
             .foregroundStyle(RMColors.textSecondary)
-        TextLinkButton(title: "Create account", action: onCreateAccount)
+        RMTextButton("Create account", action: onCreateAccount)
     }
 
     private func submit() {
@@ -154,23 +142,6 @@ struct EmailSignInView: View {
                 break
             }
         }
-    }
-}
-
-/// DS 06 text button: gold, 15 Semibold, 44 pt tall hit area.
-private struct TextLinkButton: View {
-    let title: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(RMTypography.bodyEmphasis)
-                .foregroundStyle(RMColors.gold)
-                .frame(minHeight: RMControlMetrics.minTouchTarget)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(RMPressableButtonStyle())
     }
 }
 

@@ -48,7 +48,7 @@ struct WelcomeView: View {
                 .buttonStyle(PressedOpacityButtonStyle())
             }
 
-            legalFooter
+            RMLegalFooter("By continuing, you agree to our", onShowTerms: onShowTerms, onShowPrivacy: onShowPrivacy)
                 .padding(.top, RMSpacing.lg)
                 .padding(.horizontal, RMSpacing.xs)
         }
@@ -79,28 +79,6 @@ struct WelcomeView: View {
         }
     }
 
-    private var legalFooter: some View {
-        VStack(spacing: 0) {
-            Text("By continuing, you agree to our")
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 0) { legalLinks }
-                VStack(spacing: 0) { legalLinks }
-            }
-        }
-        .font(RMTypography.caption)
-        .foregroundStyle(RMColors.textSecondary)
-        .multilineTextAlignment(.center)
-    }
-
-    @ViewBuilder
-    private var legalLinks: some View {
-        LegalLinkButton(title: "Terms of Service", action: onShowTerms)
-        Text(" and ")
-        HStack(spacing: 0) {
-            LegalLinkButton(title: "Privacy Policy", action: onShowPrivacy)
-            Text(".")
-        }
-    }
 }
 
 /// AUTH 01 layout value with no spacing token (DS 06 Buttons: 54 pt).
@@ -113,28 +91,6 @@ private enum WelcomeTypography {
     static let wordmark = Font.custom(InterFace.bold, size: 34, relativeTo: .largeTitle)
     static let wordmarkTracking: CGFloat = -0.34
     static let tagline = Font.custom(InterFace.medium, size: 16, relativeTo: .callout)
-}
-
-/// Gold underlined text link with a 44 pt hit area that does not change line layout.
-private struct LegalLinkButton: View {
-    let title: String
-    let action: () -> Void
-
-    private let hitSlop: CGFloat = 13
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(RMTypography.caption)
-                .underline()
-                .foregroundStyle(RMColors.gold)
-                .padding(.vertical, hitSlop)
-                .contentShape(Rectangle())
-                .padding(.vertical, -hitSlop)
-        }
-        .buttonStyle(PressedOpacityButtonStyle())
-        .accessibilityAddTraits(.isLink)
-    }
 }
 
 private struct PressedOpacityButtonStyle: ButtonStyle {

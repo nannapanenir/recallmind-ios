@@ -80,9 +80,12 @@ struct RMPasswordField<Field: Hashable>: View {
     private func toggleReveal() {
         let wasFocused = focus.wrappedValue == field
         isRevealed.toggle()
-        // Swapping SecureField and TextField drops focus; restore it.
+        // Swapping SecureField and TextField drops focus. Restore it on the next turn of the
+        // main queue: in this update the replacement field does not exist yet.
         if wasFocused {
-            focus.wrappedValue = field
+            DispatchQueue.main.async {
+                focus.wrappedValue = field
+            }
         }
     }
 }
