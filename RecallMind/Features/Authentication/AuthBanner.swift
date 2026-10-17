@@ -97,6 +97,8 @@ struct AuthBannerView: View {
                 title: title,
                 message: banner.message,
                 actionTitle: actionTitle,
+                // AUTH 08 draws the reset-link-expired action as a DS 06 pill.
+                actionStyle: banner == .resetLinkExpired ? .pill : .text,
                 action: actionTitle == nil ? nil : { action() }
             )
         }

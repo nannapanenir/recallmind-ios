@@ -14,10 +14,18 @@ struct RMErrorBanner: View {
         }
     }
 
+    /// `.text`: inline gold text action at the trailing edge ("Try Again").
+    /// `.pill`: DS 06 pill below the message, aligned with the text ("Send a new link").
+    enum ActionStyle {
+        case text
+        case pill
+    }
+
     private let symbol: Symbol
     private let title: String
     private let message: String?
     private let actionTitle: String?
+    private let actionStyle: ActionStyle
     private let action: (() -> Void)?
 
     @ScaledMetric(relativeTo: .body) private var iconSize: CGFloat = 18
@@ -27,18 +35,34 @@ struct RMErrorBanner: View {
         title: String,
         message: String? = nil,
         actionTitle: String? = nil,
+        actionStyle: ActionStyle = .text,
         action: (() -> Void)? = nil
     ) {
         self.symbol = symbol
         self.title = title
         self.message = message
         self.actionTitle = actionTitle
+        self.actionStyle = actionStyle
         self.action = action
     }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: RMRadius.md, style: .continuous)
 
+        VStack(alignment: .leading, spacing: RMSpacing.xs) {
+            content
+
+            if actionStyle == .pill, let actionTitle, let action {
+                RMPillButton(actionTitle, action: action)
+                    .padding(.leading, iconSize + RMSpacing.xs)
+            }
+        }
+        .padding(RMSpacing.sm)
+        .background(RMColors.surface, in: shape)
+        .overlay(shape.strokeBorder(RMColors.danger, lineWidth: RMControlMetrics.borderWidth))
+    }
+
+    private var content: some View {
         HStack(alignment: message == nil ? .center : .top, spacing: RMSpacing.xs) {
             Image(systemName: symbol.systemName)
                 .font(.system(size: iconSize))
@@ -58,7 +82,7 @@ struct RMErrorBanner: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityElement(children: .combine)
 
-            if let actionTitle, let action {
+            if actionStyle == .text, let actionTitle, let action {
                 Button(action: action) {
                     Text(actionTitle)
                         .font(RMTypography.bodyEmphasis)
@@ -70,9 +94,6 @@ struct RMErrorBanner: View {
                 .buttonStyle(RMPressableButtonStyle())
             }
         }
-        .padding(RMSpacing.sm)
-        .background(RMColors.surface, in: shape)
-        .overlay(shape.strokeBorder(RMColors.danger, lineWidth: RMControlMetrics.borderWidth))
     }
 }
 
